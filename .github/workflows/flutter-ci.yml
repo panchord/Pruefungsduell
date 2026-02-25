@@ -56,10 +56,11 @@ jobs:
       # ---- BUILD APK ----
       - name: Build APK
         working-directory: pruefungsduell
-        run: |
-          echo "👷‍♂️ Building APK..."
-          flutter build apk --release
-          echo "👷‍♂️✅ APK build complete."
+        #run: |
+        #  echo "👷‍♂️ Building APK..."
+        #  flutter build apk --release
+        #  echo "👷‍♂️✅ APK build complete."
+        echo "👷‍♂️ APK would have been built here..."
 
       # ---- BACKUP ----
       - name: Prepare backup
@@ -76,6 +77,7 @@ jobs:
 
       # ---- ARTIFACT ----
       - name: Upload APK Artifact
+        working-directory: pruefungsduell
         uses: actions/upload-artifact@v4
         with:
           name: app-release
@@ -83,6 +85,7 @@ jobs:
 
       # ---- TRANSFER TO STRATO ----
       - name: Transfer backup to remote server
+        working-directory: pruefungsduell
         run: |
           echo "✉️ Transferring backup to remote server..."
           sshpass -p "${{ secrets.STRATO_PASSWORD }}" scp -o StrictHostKeyChecking=no \
