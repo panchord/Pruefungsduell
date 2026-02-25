@@ -54,12 +54,12 @@ jobs:
           echo "✅ Tests completed."
 
       # ---- BUILD APK ----
-      - name: Build APK
-        working-directory: pruefungsduell
-        #run: |
-          echo "👷‍♂️ Building APK..."
-          flutter build apk --release
-          echo "👷‍♂️✅ APK build complete."
+      #- name: Build APK
+      #  working-directory: pruefungsduell
+      #  run: |
+      #    echo "👷‍♂️ Building APK..."
+      #    flutter build apk --release
+      #    echo "👷‍♂️✅ APK build complete."
 
       # ---- BACKUP ----
       - name: Prepare backup
