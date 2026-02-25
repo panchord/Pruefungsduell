@@ -76,11 +76,10 @@ jobs:
 
       # ---- ARTIFACT ----
       - name: Upload APK Artifact
-        working-directory: pruefungsduell
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: pruefungsduell/build/app/outputs/flutter-apk/app-release.apk
 
       # ---- TRANSFER TO STRATO ----
       - name: Transfer backup to remote server
