@@ -1,0 +1,88 @@
+name: Flutter Build, Test & Backup
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/cirruslabs/flutter:stable
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install additional tools
+        run: |
+          echo "🛠️ Installing additional tools..."
+          apt-get update && apt-get install -y zip sshpass
+          echo "🛠️✅ Tools installed."
+
+      # ---- CACHE ----
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+
+      - name: Cache Pub
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+
+      # ---- FLUTTER SETUP ----
+      - name: Flutter pub get
+        run: |
+          echo "↗️ Setting up Flutter..."
+          flutter pub get
+          echo "↗️✅ Flutter setup complete."
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          flutter test
+          echo "✅ Tests completed."
+
+      # ---- BUILD APK ----
+      - name: Build APK
+        run: |
+          echo "👷‍♂️ Building APK..."
+          flutter build apk --release
+          echo "👷‍♂️✅ APK build complete."
+
+      # ---- BACKUP ----
+      - name: Prepare backup
+        run: |
+          echo "⬇️ Preparing backup..."
+          mkdir -p build/backup
+          cp build/app/outputs/flutter-apk/app-release.apk build/backup/
+          ZIP_FILE="build/backup/flutter_backup_$(date +%Y-%m-%d_%H-%M-%S).zip"
+          zip -r "$ZIP_FILE" . \
+            -x "*.git*" "*.dart_tool*" "build/*" "*/__pycache__/*"
+          echo "⬇️✅ Backup prepared."
+          ls -lah build/backup
+
+      # ---- ARTIFACT ----
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      # ---- TRANSFER TO STRATO ----
+      - name: Transfer backup to remote server
+        run: |
+          echo "✉️ Transferring backup to remote server..."
+          sshpass -p "${{ secrets.STRATO_PASSWORD }}" scp -o StrictHostKeyChecking=no \
+            build/backup/*.zip \
+            "${{ secrets.STRATO_USER }}@${{ secrets.STRATO_HOST }}:${{ secrets.STRATO_PATH }}"
+          echo "✉️✅ Backup transfer complete."
+          
