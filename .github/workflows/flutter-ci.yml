@@ -40,12 +40,14 @@ jobs:
 
       # ---- FLUTTER SETUP ----
       - name: Flutter pub get
+        working-directory: pruefungsduell
         run: |
           echo "↗️ Setting up Flutter..."
           flutter pub get
           echo "↗️✅ Flutter setup complete."
 
       - name: Run tests
+        working-directory: pruefungsduell
         run: |
           echo "Running tests..."
           flutter test
@@ -53,6 +55,7 @@ jobs:
 
       # ---- BUILD APK ----
       - name: Build APK
+        working-directory: pruefungsduell
         run: |
           echo "👷‍♂️ Building APK..."
           flutter build apk --release
@@ -60,6 +63,7 @@ jobs:
 
       # ---- BACKUP ----
       - name: Prepare backup
+        working-directory: pruefungsduell
         run: |
           echo "⬇️ Preparing backup..."
           mkdir -p build/backup
@@ -85,4 +89,3 @@ jobs:
             build/backup/*.zip \
             "${{ secrets.STRATO_USER }}@${{ secrets.STRATO_HOST }}:${{ secrets.STRATO_PATH }}"
           echo "✉️✅ Backup transfer complete."
-          
