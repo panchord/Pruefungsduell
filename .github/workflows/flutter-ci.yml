@@ -57,10 +57,9 @@ jobs:
       - name: Build APK
         working-directory: pruefungsduell
         #run: |
-        #  echo "👷‍♂️ Building APK..."
-        #  flutter build apk --release
-        #  echo "👷‍♂️✅ APK build complete."
-        echo "👷‍♂️ APK would have been built here..."
+          echo "👷‍♂️ Building APK..."
+          flutter build apk --release
+          echo "👷‍♂️✅ APK build complete."
 
       # ---- BACKUP ----
       - name: Prepare backup
