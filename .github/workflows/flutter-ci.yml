@@ -67,7 +67,7 @@ jobs:
         run: |
           echo "⬇️ Preparing backup..."
           mkdir -p build/backup
-          cp build/app/outputs/flutter-apk/app-release.apk build/backup/
+          # cp build/app/outputs/flutter-apk/app-release.apk build/backup/
           ZIP_FILE="build/backup/flutter_backup_$(date +%Y-%m-%d_%H-%M-%S).zip"
           zip -r "$ZIP_FILE" . \
             -x "*.git*" "*.dart_tool*" "build/*" "*/__pycache__/*"
