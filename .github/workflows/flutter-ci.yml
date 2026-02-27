@@ -72,7 +72,7 @@ jobs:
           zip -r "$ZIP_FILE" . \
             -x "*.git*" "*.dart_tool*" "build/*" "*/__pycache__/*"
           echo "⬇️✅ Backup prepared."
-          ls -lah build/backup‚
+          ls -lah build/backup/
 
       # ---- ARTIFACT ----
       - name: Upload APK Artifact
