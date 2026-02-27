@@ -32,6 +32,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
   Future<void> _showAddCardDialog() async {
     final questionController = TextEditingController();
     final answerController = TextEditingController();
+    final messenger = ScaffoldMessenger.of(context);
 
     final result = await showDialog<bool>(
       context: context,
@@ -75,13 +76,14 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
                   return;
                 }
 
+                final navigator = Navigator.of(context);
                 await _dbHelper.insertCard(
                   deckId: widget.deckId,
                   question: question,
                   answer: answer,
                 );
-                if (!mounted) return;
-                Navigator.of(context).pop(true);
+                if (!context.mounted) return;
+                navigator.pop(true);
               },
               child: const Text('Speichern'),
             ),
@@ -91,9 +93,9 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     );
 
     if (result == true) {
-      setState(_reloadCards);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      setState(_reloadCards);
+      messenger.showSnackBar(
         const SnackBar(content: Text('Frage hinzugefügt')),
       );
     }
@@ -159,7 +161,7 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
 
                     if (confirmed == true) {
                       await _dbHelper.deleteCard(card['id'] as int);
-                      if (!mounted) return;
+                      if (!context.mounted) return;
                       setState(_reloadCards);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Frage gelöscht')),

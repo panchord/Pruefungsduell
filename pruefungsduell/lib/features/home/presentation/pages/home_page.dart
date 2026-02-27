@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pruefungsduell/features/decks/presentation/pages/deck_list_page.dart';
+import 'package:pruefungsduell/features/practice/presentation/pages/practice_deck_select_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -42,12 +43,11 @@ class HomePage extends StatelessWidget {
                 icon: const Icon(Icons.quiz),
                 label: const Text('Abgefragt werden'),
                 onPressed: () {
-                  // TODO: Navigation zur Abfrage-/Lern-Seite
-                  // Navigator.of(context).push(
-                  //   MaterialPageRoute(
-                  //     builder: (_) => const QuizPage(),
-                  //   ),
-                  // );
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const PracticeDeckSelectPage(),
+                    ),
+                  );
                 },
               ),
             ),

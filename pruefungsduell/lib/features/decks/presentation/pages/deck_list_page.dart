@@ -25,6 +25,7 @@ class _DeckListPageState extends State<DeckListPage> {
 
   Future<void> _showAddDeckDialog() async {
     final controller = TextEditingController();
+    final messenger = ScaffoldMessenger.of(context);
 
     final result = await showDialog<bool>(
       context: context,
@@ -50,9 +51,10 @@ class _DeckListPageState extends State<DeckListPage> {
                   return;
                 }
 
+                final navigator = Navigator.of(context);
                 await _dbHelper.insertDeck(title);
-                if (!mounted) return;
-                Navigator.of(context).pop(true);
+                if (!context.mounted) return;
+                navigator.pop(true);
               },
               child: const Text('Speichern'),
             ),
@@ -62,9 +64,9 @@ class _DeckListPageState extends State<DeckListPage> {
     );
 
     if (result == true) {
-      setState(_reloadDecks);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      setState(_reloadDecks);
+      messenger.showSnackBar(
         const SnackBar(content: Text('Deck angelegt')),
       );
     }
@@ -132,7 +134,7 @@ class _DeckListPageState extends State<DeckListPage> {
 
                         if (confirmed == true) {
                           await _dbHelper.deleteDeck(deck['id'] as int);
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           setState(_reloadDecks);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Deck gelöscht')),
