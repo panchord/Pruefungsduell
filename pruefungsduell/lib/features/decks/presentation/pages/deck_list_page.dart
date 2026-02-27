@@ -104,7 +104,45 @@ class _DeckListPageState extends State<DeckListPage> {
               final deck = decks[index];
               return ListTile(
                 title: Text(deck['title'] as String),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Deck löschen'),
+                            content: Text(
+                              'Möchtest du das Deck "${deck['title']}" und alle dazugehörigen Fragen wirklich löschen?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: const Text('Abbrechen'),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.of(context).pop(true),
+                                child: const Text('Löschen'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirmed == true) {
+                          await _dbHelper.deleteDeck(deck['id'] as int);
+                          if (!mounted) return;
+                          setState(_reloadDecks);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Deck gelöscht')),
+                          );
+                        }
+                      },
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(

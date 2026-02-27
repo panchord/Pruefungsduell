@@ -134,6 +134,39 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
               return ListTile(
                 title: Text(card['question'] as String),
                 subtitle: Text(card['answer'] as String),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Frage löschen'),
+                        content: const Text(
+                          'Möchtest du diese Frage wirklich löschen?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Abbrechen'),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Löschen'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirmed == true) {
+                      await _dbHelper.deleteCard(card['id'] as int);
+                      if (!mounted) return;
+                      setState(_reloadCards);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Frage gelöscht')),
+                      );
+                    }
+                  },
+                ),
               );
             },
           );

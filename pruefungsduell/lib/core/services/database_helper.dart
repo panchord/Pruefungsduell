@@ -98,4 +98,17 @@ class DatabaseHelper {
       orderBy: 'id ASC',
     );
   }
+
+  Future<int> deleteDeck(int id) async {
+    final db = await database;
+
+    await db.delete('cards', where: 'deck_id = ?', whereArgs: [id]);
+
+    return db.delete('decks', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteCard(int id) async {
+    final db = await database;
+    return db.delete('cards', where: 'id = ?', whereArgs: [id]);
+  }
 }
