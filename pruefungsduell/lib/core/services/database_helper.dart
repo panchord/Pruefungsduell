@@ -1,5 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:pruefungsduell/core/models/deck_progress_stats.dart';
 
 class DatabaseHelper {
   static const _dbName = 'pruefungsduell.db';
@@ -166,5 +167,68 @@ class DatabaseHelper {
   Future<int> deleteCard(int id) async {
     final db = await database;
     return db.delete('cards', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<DeckProgressStats> getProgressStats(int deckId) async {
+    final db = await database;
+
+    // Total cards
+    final totalResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM cards WHERE deck_id = ?',
+      [deckId],
+    );
+    final totalCards = (totalResult.first['count'] as int?) ?? 0;
+
+    if (totalCards == 0) {
+      return DeckProgressStats(
+        totalCards: 0,
+        knownCards: 0,
+        dueCards: 0,
+        percentage: 0,
+        streak: 0,
+      );
+    }
+
+    // Known cards
+    final knownResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM cards WHERE deck_id = ? AND last_known = 1',
+      [deckId],
+    );
+    final knownCards = (knownResult.first['count'] as int?) ?? 0;
+
+    // Due cards
+    final dueCards = (await getDueCardsForPractice(
+      deckId: deckId,
+      hideKnownFor: const Duration(days: 2),
+    ))
+        .length;
+
+    // Percentage
+    final percentage = (knownCards / totalCards) * 100;
+
+    // Streak - consecutive known cards from the end
+    final allCards = await db.query(
+      'cards',
+      where: 'deck_id = ?',
+      whereArgs: [deckId],
+      orderBy: 'last_answered_at DESC',
+    );
+
+    int streak = 0;
+    for (final card in allCards) {
+      if (card['last_known'] == 1) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    return DeckProgressStats(
+      totalCards: totalCards,
+      knownCards: knownCards,
+      dueCards: dueCards,
+      percentage: percentage,
+      streak: streak,
+    );
   }
 }
