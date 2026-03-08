@@ -11,18 +11,23 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    final db = await _dbHelper.database;
-
     try {
-      await db.insert('users', {
-        'email': email,
-        'password': password, // Demo: Klartext, später: Hash!
-      }, conflictAlgorithm: ConflictAlgorithm.abort);
-    } on DatabaseException catch (e) {
-      if (e.isUniqueConstraintError()) {
-        throw AuthException('Diese E-Mail ist bereits registriert');
+      final db = await _dbHelper.database;
+
+      try {
+        await db.insert('users', {
+          'email': email,
+          'password': password, // Demo: Klartext, später: Hash!
+        }, conflictAlgorithm: ConflictAlgorithm.abort);
+      } on DatabaseException catch (e) {
+        if (e.isUniqueConstraintError()) {
+          throw AuthException('Diese E-Mail ist bereits registriert');
+        }
+        rethrow;
       }
-      rethrow;
+    } catch (e) {
+      if (e is AuthException) rethrow;
+      throw AuthException('Registrierungsfehler: ${e.toString()}');
     }
   }
 
