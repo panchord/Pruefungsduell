@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pruefungsduell/features/decks/presentation/pages/deck_list_page.dart';
 import 'package:pruefungsduell/features/practice/presentation/pages/practice_deck_select_page.dart';
+import 'package:pruefungsduell/features/statistics/presentation/pages/all_decks_stats_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -46,6 +47,22 @@ class HomePage extends StatelessWidget {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => const PracticeDeckSelectPage(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.bar_chart),
+                label: const Text('Statistiken'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AllDecksStatsPage(),
                     ),
                   );
                 },

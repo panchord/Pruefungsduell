@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pruefungsduell/core/services/database_helper.dart';
+import 'package:pruefungsduell/features/statistics/presentation/pages/deck_stats_page.dart';
 
 class DeckDetailPage extends StatefulWidget {
   const DeckDetailPage({
@@ -106,6 +107,23 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.deckTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'Statistiken anzeigen',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DeckStatsPage(
+                    deckId: widget.deckId,
+                    deckTitle: widget.deckTitle,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _cardsFuture,
