@@ -1,5 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:cross_file/cross_file.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:pruefungsduell/core/services/database_helper.dart';
+import 'package:pruefungsduell/features/decks/domain/services/deck_import_export_service.dart';
 import 'package:pruefungsduell/features/decks/presentation/pages/deck_detail_page.dart';
 
 class DeckListPage extends StatefulWidget {
@@ -21,6 +29,95 @@ class _DeckListPageState extends State<DeckListPage> {
 
   void _reloadDecks() {
     _decksFuture = _dbHelper.getDecks();
+  }
+
+  Future<void> _shareDeckPackageJson({
+    required String filename,
+    required String json,
+  }) async {
+    final tmpDir = await getTemporaryDirectory();
+    final filePath = '${tmpDir.path}/$filename';
+    final file = File(filePath);
+    await file.writeAsString(json, encoding: utf8);
+
+    await Share.shareXFiles(
+      [XFile(filePath)],
+      text: 'Pruefungsduell Deckpaket teilen',
+      subject: 'Deckpaket',
+    );
+  }
+
+  String _timestampForFilename() {
+    return DateTime.now().toIso8601String().replaceAll(':', '-');
+  }
+
+  Future<void> _importDeckPackage() async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final pickerResult = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+      if (pickerResult == null) return;
+
+      final picked = pickerResult.files.single;
+      final bytes = picked.bytes;
+      final jsonStr = bytes != null
+          ? utf8.decode(bytes)
+          : picked.path != null
+              ? utf8.decode(await File(picked.path!).readAsBytes())
+              : throw StateError('Import-Datei konnte nicht gelesen werden.');
+
+      final service = DeckImportExportService();
+      final result = await service.importDeckPackage(json: jsonStr);
+
+      if (!context.mounted) return;
+      setState(_reloadDecks);
+
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Import abgeschlossen: ${result.decksImported} Decks, ${result.cardsImported} Karten.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Import fehlgeschlagen: $e'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _exportAllDecks() async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final decks = await _dbHelper.getDecks();
+      if (decks.isEmpty) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Keine Decks vorhanden.')),
+        );
+        return;
+      }
+
+      final deckIds = decks.map((d) => d['id'] as int).toList(growable: false);
+      final service = DeckImportExportService();
+      final package = await service.exportDecks(deckIds: deckIds);
+      final jsonStr = jsonEncode(package.toJson());
+
+      final filename = 'pruefungsduell_decks_${_timestampForFilename()}.pddeck.json';
+      await _shareDeckPackageJson(filename: filename, json: jsonStr);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Export fehlgeschlagen: $e'),
+        ),
+      );
+    }
   }
 
   Future<void> _showAddDeckDialog() async {
@@ -77,6 +174,18 @@ class _DeckListPageState extends State<DeckListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Decks'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.upload_file),
+            tooltip: 'Deckpaket importieren',
+            onPressed: _importDeckPackage,
+          ),
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: 'Deckpaket exportieren',
+            onPressed: _exportAllDecks,
+          ),
+        ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _decksFuture,

@@ -1,5 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:cross_file/cross_file.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:pruefungsduell/core/services/database_helper.dart';
+import 'package:pruefungsduell/features/decks/domain/services/deck_import_export_service.dart';
 import 'package:pruefungsduell/features/statistics/presentation/pages/deck_stats_page.dart';
 
 class DeckDetailPage extends StatefulWidget {
@@ -19,6 +26,53 @@ class DeckDetailPage extends StatefulWidget {
 class _DeckDetailPageState extends State<DeckDetailPage> {
   final _dbHelper = DatabaseHelper.instance;
   late Future<List<Map<String, dynamic>>> _cardsFuture;
+
+  Future<void> _shareDeckPackageJson({
+    required String filename,
+    required String json,
+  }) async {
+    final tmpDir = await getTemporaryDirectory();
+    final filePath = '${tmpDir.path}/$filename';
+    final file = File(filePath);
+    await file.writeAsString(json, encoding: utf8);
+
+    await Share.shareXFiles(
+      [XFile(filePath)],
+      text: 'Pruefungsduell Deckpaket teilen',
+      subject: 'Deckpaket',
+    );
+  }
+
+  String _timestampForFilename() {
+    return DateTime.now().toIso8601String().replaceAll(':', '-');
+  }
+
+  String _sanitizeFilename(String input) {
+    final trimmed = input.trim();
+    if (trimmed.isEmpty) return 'deck_package';
+    return trimmed.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+  }
+
+  Future<void> _exportCurrentDeck() async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      final service = DeckImportExportService();
+      final package = await service.exportDecks(deckIds: [widget.deckId]);
+      final jsonStr = jsonEncode(package.toJson());
+
+      final title = _sanitizeFilename(widget.deckTitle);
+      final filename =
+          '${title}_${_timestampForFilename()}.pddeck.json';
+      await _shareDeckPackageJson(filename: filename, json: jsonStr);
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Export fehlgeschlagen: $e'),
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -108,6 +162,11 @@ class _DeckDetailPageState extends State<DeckDetailPage> {
       appBar: AppBar(
         title: Text(widget.deckTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: 'Deckpaket exportieren',
+            onPressed: _exportCurrentDeck,
+          ),
           IconButton(
             icon: const Icon(Icons.bar_chart),
             tooltip: 'Statistiken anzeigen',

@@ -84,12 +84,39 @@ class DatabaseHelper {
     return db.query('decks', orderBy: 'title COLLATE NOCASE');
   }
 
+  /// Liefert alle Deck-Titel lowercased zurück.
+  ///
+  /// Hilft dabei, Titel bei Importen case-insensitive eindeutig zu machen.
+  Future<Set<String>> getDeckTitlesLowercased() async {
+    final decks = await getDecks();
+    return decks.map((d) => (d['title'] as String).toLowerCase()).toSet();
+  }
+
   Future<int> insertCard({
     required int deckId,
     required String question,
     required String answer,
   }) async {
     final db = await database;
+    return db.insert('cards', {
+      'deck_id': deckId,
+      'question': question,
+      'answer': answer,
+    });
+  }
+
+  /// Insert-Variante, die in einer bestehenden Transaction verwendet werden kann.
+  Future<int> insertDeckOnDb(DatabaseExecutor db, String title) async {
+    return db.insert('decks', {'title': title});
+  }
+
+  /// Insert-Variante, die in einer bestehenden Transaction verwendet werden kann.
+  Future<int> insertCardOnDb({
+    required DatabaseExecutor db,
+    required int deckId,
+    required String question,
+    required String answer,
+  }) async {
     return db.insert('cards', {
       'deck_id': deckId,
       'question': question,
