@@ -8,6 +8,8 @@ import 'package:pruefungsduell/features/duel/domain/services/pruefi_bot.dart';
 import 'package:pruefungsduell/features/duel/presentation/pages/duel_result_page.dart';
 import 'package:pruefungsduell/features/practice/domain/models/practice_card.dart';
 
+/// Seite, die eine komplette Duell-Session für ein Deck startet
+/// und den Ladeprozess der Karten kapselt.
 class DuelSessionPage extends StatefulWidget {
   const DuelSessionPage({
     super.key,
@@ -24,6 +26,7 @@ class DuelSessionPage extends StatefulWidget {
   State<DuelSessionPage> createState() => _DuelSessionPageState();
 }
 
+/// Ergebnisobjekt für den asynchronen Karten-Ladevorgang.
 class _DuelLoadResult {
   const _DuelLoadResult({required this.cards});
 
@@ -40,6 +43,8 @@ class _DuelSessionPageState extends State<DuelSessionPage> {
     _cardsFuture = _loadCards();
   }
 
+  /// Lädt alle Karten für das Deck, mischt sie
+  /// und wählt maximal 20 zufällige Karten aus.
   Future<_DuelLoadResult> _loadCards() async {
     final allRaw = await _dbHelper.getCardsForDeck(widget.deckId);
     final cards = allRaw.map(PracticeCard.fromMap).toList(growable: false);
@@ -132,12 +137,15 @@ class _DuelSessionViewState extends State<_DuelSessionView> {
     _totalRounds = _cards.length;
   }
 
+  /// Wechselt zwischen Frage- und Antwortseite der aktuellen Karte.
   void _toggleSide() {
     setState(() {
       _showAnswer = !_showAnswer;
     });
   }
 
+  /// Verarbeitet die Antwort des Users für die aktuelle Karte
+  /// und lässt den Bot anhand der Schwierigkeit raten.
   void _answer(bool known) {
     if (_cards.isEmpty) return;
 
@@ -151,6 +159,8 @@ class _DuelSessionViewState extends State<_DuelSessionView> {
     });
   }
 
+  /// Wechselt zur nächsten Karte oder zeigt das Ergebnis,
+  /// wenn alle Runden gespielt wurden.
   void _next() {
     if (_cards.isEmpty) return;
 

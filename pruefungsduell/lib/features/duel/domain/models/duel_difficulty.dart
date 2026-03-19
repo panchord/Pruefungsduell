@@ -1,9 +1,11 @@
+/// Mögliche Schwierigkeitsstufen für das Duell.
 enum DuelDifficulty {
   easy,
   medium,
   hard,
 }
 
+/// Erweiterungen für Labels und Trefferquoten je Schwierigkeit.
 extension DuelDifficultyX on DuelDifficulty {
   String get label => switch (this) {
         DuelDifficulty.easy => 'Leicht',

@@ -3,6 +3,8 @@ import 'package:pruefungsduell/features/duel/domain/models/duel_difficulty.dart'
 import 'package:pruefungsduell/features/duel/domain/models/duel_result.dart';
 import 'package:pruefungsduell/features/duel/presentation/pages/duel_session_page.dart';
 
+/// Seite, die das Ergebnis eines Duells anzeigt
+/// und einen Neustart oder das Zurückkehren ermöglicht.
 class DuelResultPage extends StatelessWidget {
   const DuelResultPage({super.key, required this.result});
 

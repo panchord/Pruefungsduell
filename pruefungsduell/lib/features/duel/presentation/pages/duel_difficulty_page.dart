@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pruefungsduell/features/duel/domain/models/duel_difficulty.dart';
 import 'package:pruefungsduell/features/duel/presentation/pages/duel_session_page.dart';
 
+/// Seite zur Auswahl der Duell-Schwierigkeit für ein bestimmtes Deck.
 class DuelDifficultyPage extends StatefulWidget {
   const DuelDifficultyPage({
     super.key,

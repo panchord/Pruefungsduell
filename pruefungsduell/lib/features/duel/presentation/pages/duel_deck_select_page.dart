@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pruefungsduell/core/services/database_helper.dart';
 import 'package:pruefungsduell/features/duel/presentation/pages/duel_difficulty_page.dart';
 
+/// Seite, auf der der Nutzer ein Deck für das Duell auswählt.
 class DuelDeckSelectPage extends StatefulWidget {
   const DuelDeckSelectPage({super.key});
 

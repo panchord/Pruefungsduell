@@ -1,3 +1,4 @@
+/// Datenmodell für eine Lernkarte in einem Deck.
 class PracticeCard {
   const PracticeCard({
     required this.id,
@@ -15,6 +16,7 @@ class PracticeCard {
   final bool? lastKnown;
   final DateTime? lastAnsweredAt;
 
+  /// Erzeugt eine Karte aus einem DB-Map-Eintrag.
   factory PracticeCard.fromMap(Map<String, dynamic> map) {
     final lastKnownRaw = map['last_known'] as int?;
     final lastAnsweredAtRaw = map['last_answered_at'] as int?;
