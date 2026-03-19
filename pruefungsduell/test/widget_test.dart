@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pruefungsduell/app/app.dart';
+import 'package:pruefungsduell/features/home/presentation/pages/home_page.dart';
 
 void main() {
   Widget createApp() => const PruefungsduellApp();
@@ -53,5 +54,16 @@ void main() {
     // AppBar-Titel und Button-Text enthalten "Registrieren"
     expect(find.text('Registrieren'), findsWidgets);
     expect(find.byType(TextFormField), findsNWidgets(3));
+  });
+
+  testWidgets('HomePage zeigt Prüfungsduell-Button', (WidgetTester tester) async {
+    // Direkt HomePage testen, ohne Login-Flow/DB.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: HomePage(),
+      ),
+    );
+
+    expect(find.text('Prüfungsduell'), findsOneWidget);
   });
 }
